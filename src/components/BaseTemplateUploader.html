@@ -15,11 +15,13 @@
       const file = templateInput.files[0];
 
       const fileReader = new FileReader();
+      const parser = new DOMParser();
       fileReader.onload = function (e) {
         let parsed = parser.parseFromString(e.target.result, "text/html");
         parsed.documentElement.body =
-          parsed.documentElement.getElementsByTagName("body")[0];  
-        templateBase = parsed;
+          parsed.documentElement.getElementsByTagName("body")[0];
+        uploadedTemplateBase = parsed;
+        updatePreview();
       };
       fileReader.readAsText(file);
     } else {

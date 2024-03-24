@@ -8,10 +8,9 @@
   />
   <button hx-on:click="uploadFile()">Upload Content Files</button>
 </div>
-<script src="/src/helper/index.js"></script>
 <script>
-  const fileInput = document.getElementById("fileInput");
   function uploadFile() {
+    const fileInput = document.getElementById("fileInput");
     const files = fileInput.files;
     const isValid = validateSize(files);
 
@@ -21,8 +20,10 @@
       reader.onload = function (event) {
         const fileData = event.target.result; 
         mdContent = fileData
-      };
-      reader.readAsText(files[0]); // Read file as text
+      };  
+      reader.readAsText(files[0]);
+      uploadedFiles = files; 
+      updatePreview();
     }else{ 
       alert("Please upload a file");
     }

@@ -17,33 +17,78 @@
 
     <button hx-on:click="build()">build</button>
 
+    <div id="template-preview"></div>
+    <div id="content-list"></div>
+
     <div id="output"></div>
 
     <script>
-      const parser = new DOMParser();
-
+      //global variables
       var mdContent = null;
-      var templateBase = null;
-      function build() {
+      var uploadedFiles = [];
+      var uploadedTemplateBase = null;
+
+      function updatePreview() {
+        const templatePreview = document.getElementById("template-preview");
+        const contentList = document.getElementById("content-list");
+
+        if (uploadedFiles.length !== 0) {
+          // render content files
+          contentList.innerHTML = "<h3>Uploaded Files</h3>";
+          for (let file of uploadedFiles) {
+            contentList.innerHTML += file.name + "<br>";
+          }
+        }
+
+        // render the whole template
+        if (uploadedTemplateBase) {
+          templatePreview.innerHTML = "<h3>Template Preview</h3>";
+          templatePreview.innerHTML +=
+            uploadedTemplateBase.documentElement.innerHTML;
+        }
+      }
+
+      async function build() {
         const output = document.getElementById("output");
 
-        if (!mdContent || !templateBase) {
-          alert("Please upload both files");
+        if (!mdContent) {
+          alert("Please upload markdown content");
+          return;
+        }
+        if (!uploadedTemplateBase) {
+          alert("Please upload a template");
           return;
         }
 
-        // add md content on top of base template
-        const body = templateBase.documentElement.body;
-        body.innerHTML += marked.parse(mdContent);
+        // add content to the template
+        const body = uploadedTemplateBase.documentElement.body;
+        const res = await fetch("/src/templates/single-item.html");
+        const template = await res.text();
+        const singleItemTemplate = Handlebars.compile(template);
+        for (let file of uploadedFiles) {
+          body.innerHTML += singleItemTemplate({
+            header: file.name,
+            description: "description here",
+            contentLink: 
+          });
+        }
 
-        // render the whole template
-        output.innerHTML = templateBase.documentElement.innerHTML;
+        // render the whole template in another page.
+        sessionStorage.setItem(
+          "result",
+          JSON.stringify(uploadedTemplateBase.documentElement.innerHTML)
+        );
+        const url = "src/components/ResultPage.html";
+        window.open(url, '_blank').focus();
       }
     </script>
 
+    <!-- internal libs -->
+    <script src="/src/helper/index.js"></script>
+    <!-- external libs -->
     <script type="text/javascript" src="/lib/zip.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
-    <!-- htmx & hyperscript -->
+    <script src="https://cdn.jsdelivr.net/npm/handlebars@latest/dist/handlebars.js"></script>
     <script src="https://unpkg.com/hyperscript.org@0.9.12"></script>
     <script src="https://unpkg.com/htmx.org@1.9.11"></script>
   </body>
