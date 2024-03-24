@@ -1,0 +1,29 @@
+<div>
+  <input
+    hx-on:change="validateSize(this, 2000000)"
+    type="file"
+    id="templateInput"
+    accept=".rar, .zip, .html"
+  />
+  <button hx-on:click="uploadTemplateFile()">Upload Template Zip</button>
+</div>
+<script src="/src/helper/index.js"></script>
+<script>
+  function uploadTemplateFile() {
+    const templateInput = document.getElementById("templateInput");
+    if (templateInput.files.length !== 0) {
+      const file = templateInput.files[0];
+
+      const fileReader = new FileReader();
+      fileReader.onload = function (e) {
+        let parsed = parser.parseFromString(e.target.result, "text/html");
+        parsed.documentElement.body =
+          parsed.documentElement.getElementsByTagName("body")[0];  
+        templateBase = parsed;
+      };
+      fileReader.readAsText(file);
+    } else {
+      alert("Please upload a file");
+    }
+  }
+</script>

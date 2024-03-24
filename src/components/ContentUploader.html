@@ -1,0 +1,30 @@
+<div>
+  <input
+    hx-on:change="validateSize(this,2000000)"
+    type="file"
+    id="fileInput"
+    accept=".md, .txt"
+    multiple
+  />
+  <button hx-on:click="uploadFile()">Upload Content Files</button>
+</div>
+<script src="/src/helper/index.js"></script>
+<script>
+  const fileInput = document.getElementById("fileInput");
+  function uploadFile() {
+    const files = fileInput.files;
+    const isValid = validateSize(files);
+
+    if (files.length !== 0) {
+      // Read file contents using FileReader
+      const reader = new FileReader();
+      reader.onload = function (event) {
+        const fileData = event.target.result; 
+        mdContent = fileData
+      };
+      reader.readAsText(files[0]); // Read file as text
+    }else{ 
+      alert("Please upload a file");
+    }
+  }
+</script>
