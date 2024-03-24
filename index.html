@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>Home</title>
+  </head>
+  <body>
+    <input
+      hx-on:change="validateSize()"
+      type="file"
+      id="fileInput"
+      accept=".md, .txt"
+      multiple
+    />
+    <button hx-on:click="uploadFile()">Upload Content Files</button>
+
+    <input
+      hx-on:change="validateSize()"
+      type="file"
+      id="templateInput"
+      accept=".rar, .zip, .html"
+    />
+    <button hx-on:click="uploadTemplateFile()">Upload Template Zip</button>
+
+    <button hx-on:click="combine()">Combine</button>
+
+    <div id="output">
+    </div>
+
+    <script>
+      const fileInput = document.getElementById("fileInput");
+      const templateInput = document.getElementById("templateInput");
+      const output = document.getElementById("output");
+
+      const parser = new DOMParser();
+
+      let md_content = "";
+      let template_doc = null;
+      function combine() {
+        if (md_content === "" || !template_doc) {
+          alert("Please upload both files");
+          return;
+        }
+
+        const body = template_doc.documentElement.body;
+        body.innerHTML += marked.parse(md_content);
+        output.innerHTML = template_doc.documentElement.innerHTML;
+      }
+
+      // template
+      function uploadTemplateFile() {
+        if (templateInput.files.length !== 0) {
+          const file = templateInput.files[0];
+
+          const fileReader = new FileReader();
+          fileReader.onload = function (e) {
+            let parsed = parser.parseFromString(e.target.result, "text/html");
+            parsed.documentElement.body =
+              parsed.documentElement.getElementsByTagName("body")[0];
+            template_doc = parsed;
+          };
+          fileReader.readAsText(file);
+        }
+      }
+
+      // content
+      function validateSize() {
+        const file = fileInput.files[0];
+        const isValid = file.size <= 2097152;
+        if (!isValid) {
+          alert("File size is more than 2MB");
+          fileInput.value = "";
+        }
+      }
+
+      function uploadFile() {
+        const files = fileInput.files;
+        const isValid = validateSize(files);
+
+        if (files.length !== 0) {
+          // Read file contents using FileReader
+          const reader = new FileReader();
+          reader.onload = function (event) {
+            const fileData = event.target.result;
+            md_content = fileData;
+          };
+          reader.readAsText(files[0]); // Read file as text
+        }
+      }
+    </script>
+
+    <script type="text/javascript" src="/lib/zip.min.js"></script>
+    <script type="module" src="https://md-block.verou.me/md-block.js"></script>
+        <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+    <!-- htmx & hyperscript -->
+    <script src="https://unpkg.com/hyperscript.org@0.9.12"></script>
+    <script src="https://unpkg.com/htmx.org@1.9.11"></script>
+  </body>
+</html>
