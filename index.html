@@ -51,48 +51,80 @@
       async function build() {
         const output = document.getElementById("output");
 
-        if (!mdContent) {
+        if (uploadedFiles.length === 0) {
           alert("Please upload markdown content");
           return;
-        }  
+        }
 
         // build default template components
-        const singleItemTemplate = await (await fetch("/src/templates/default/massively/single-item.html")).text();
-        const fullItemTemplate = await (await fetch("/src/templates/default/massively/full-item.html")).text(); 
+        const singleItemTemplate = await (
+          await fetch("/src/templates/default/massively/single-item.html")
+        ).text();
+        const fullItemTemplate = await (
+          await fetch("/src/templates/default/massively/full-item.html")
+        ).text();
         Handlebars.registerPartial("singleItemPartial", singleItemTemplate);
 
         // pick base template
-        let baseTemplate = await (await fetch("/src/templates/default/massively/index.html")).text();
-        if (uploadedTemplateBase) { 
+        let baseTemplate = await (
+          await fetch("/src/templates/default/massively/index.html")
+        ).text();
+        if (uploadedTemplateBase) {
           baseTemplate = uploadedTemplateBase.documentElement.innerHTML;
         }
 
-        // build full page   
+        // read content from markdown files
+        const mdReader = new MarkdownReader();
+        const contentMds = await mdReader.readFiles(uploadedFiles);
+        const contentHtmls = mdReader.parseToHTML(contentMds);
+
+        // build full item pages
+        const fullItemCompiler = Handlebars.compile(fullItemTemplate); 
+        let fullItemPages = []
+        for (let content of contentHtmls) {
+          const fullItemPage = fullItemCompiler({
+            content: content.data,
+            title: "Untitled",
+            date: "2005-15-01",
+          }); 
+          fullItemPages.push({data: fullItemPage, name: content.name});
+        }
+
+        // build full page
         const fullPageCompiler = Handlebars.compile(baseTemplate);
-        let articles = []
-        for (let file of uploadedFiles) {  
+        let articles = [];
+        for (let file of uploadedFiles) {
           articles.push({
             header: file.name,
             description: "description",
-            contentLink: "#"
+            contentLink: "/posts/" + file.name + ".html",
           });
-        } 
-        const fullPage = fullPageCompiler({articles: articles});
+        }
+        const fullPage = fullPageCompiler({ articles: articles });
+
+
+        // packed to zip and download 
+        const downloader = new DownloaderService(); 
+        downloader.packFiles(fullItemPages,"/posts/"); 
+        downloader.packFile({data: fullPage, name: "index.html"})  
+        await downloader.packDefaultTemplateAssets("massively");
+        downloader.download();
 
         // render the whole template in another page.
-        sessionStorage.setItem(
-          "result",
-          fullPage
-        );
-        const url = "src/components/ResultPage.html";
-        window.open(url, '_blank').focus();
+        // sessionStorage.setItem("result", fullPage);
+        // const url = "src/components/ResultPage.html";
+        // window.open(url, "_blank").focus();
       }
     </script>
 
     <!-- internal libs -->
-    <script src="/src/helper/index.js"></script>
+    <script src="src/helper/index.js"></script>
+    <script src="src/service/readMarkdown.js"></script>
+    <script src="src/service/downloaderService.js"></script>
     <!-- external libs -->
-    <script type="text/javascript" src="/lib/zip.min.js"></script>
+    <script type="text/javascript" src="dist/jszip-utils.js"></script>
+    <script src="lib/jszip.min.js"></script>
+    <script src="lib/FileSaver.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/handlebars@latest/dist/handlebars.js"></script>
     <script src="https://unpkg.com/hyperscript.org@0.9.12"></script>
