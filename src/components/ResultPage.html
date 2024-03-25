@@ -1,13 +1,18 @@
 <!DOCTYPE html>
 <html>
   <head> </head>
-  <body>
+  <body> 
+    <iframe height="650" width="800" id="previewFrame" src="data:text/html;charset=utf-8;base64,"></iframe>
     <script>
-        let result = sessionStorage.getItem("result") ; 
+        let result = sessionStorage.getItem("result") ;   
       if (result) { 
-        document.open();  
-        document.write(result)
-        document.close();
+        result = btoa(result);
+        const iframe = document.getElementById("previewFrame"); 
+        iframe.src+=result; 
+        // console.log(result);
+        // document.open();  
+        // document.write(result)
+        // document.close();
       }
     </script>
   </body>

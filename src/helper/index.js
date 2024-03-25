@@ -14,7 +14,7 @@ function isFileNameOverlap(fileList) {
   let nameMap = {};
 
   for (let file of fileList) { 
-    const fileName = file.name
+    const fileName = file.name.trim();
     if (nameMap.hasOwnProperty(fileName)) {
       isOverlap = true;
       break;

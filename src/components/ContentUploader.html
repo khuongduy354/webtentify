@@ -13,27 +13,17 @@
     const fileInput = document.getElementById("fileInput");
     const files = fileInput.files;
 
-    if (files.length !== 0) { 
+    if (files.length !== 0) {
       // check overlap
-      if(isFileNameOverlap(files)){ 
+      if (isFileNameOverlap(files)) {
         alert("All files must have distinct name");
         return;
-      } 
-
-      // Read file contents using FileReader
-      const reader = new FileReader();
-      reader.onload = function (event) {
-        const fileData = event.target.result;  
-
-        // store the file content in global variable
-        mdContent = fileData
-      };  
-      reader.readAsText(files[0]); 
+      }
 
       // show list of uploaded files
-      uploadedFiles = files;   
+      uploadedFiles = files;
       updatePreview();
-    }else{ 
+    } else {
       alert("Please upload a file");
     }
   }
