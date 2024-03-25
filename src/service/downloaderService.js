@@ -46,9 +46,9 @@ class DownloaderService {
   }
 
 
-  download(zipName = "example.zip") {
+  download(zipName = "example") {
     this.zip.generateAsync({ type: "blob" }).then(function (content) {
-      saveAs(content, zipName);
+      saveAs(content, zipName+".zip");
     });
   }
 }

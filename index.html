@@ -77,6 +77,7 @@
         const mdReader = new MarkdownReader();
         const contentMds = await mdReader.readFiles(uploadedFiles);
         const contentHtmls = mdReader.parseToHTML(contentMds);
+        console.log(contentHtmls);
 
         // build full item pages
         const fullItemCompiler = Handlebars.compile(fullItemTemplate); 
@@ -93,11 +94,12 @@
         // build full page
         const fullPageCompiler = Handlebars.compile(baseTemplate);
         let articles = [];
-        for (let file of uploadedFiles) {
+        for (let file of uploadedFiles) { 
+          let filename = file.name.replace(".md", ".html");
           articles.push({
-            header: file.name,
+            header: filename,
             description: "description",
-            contentLink: "/posts/" + file.name + ".html",
+            contentLink: "./" + filename
           });
         }
         const fullPage = fullPageCompiler({ articles: articles });
@@ -105,10 +107,10 @@
 
         // packed to zip and download 
         const downloader = new DownloaderService(); 
-        downloader.packFiles(fullItemPages,"/posts/"); 
+        downloader.packFiles(fullItemPages); 
         downloader.packFile({data: fullPage, name: "index.html"})  
         await downloader.packDefaultTemplateAssets("massively");
-        downloader.download();
+        downloader.download("website");
 
         // render the whole template in another page.
         // sessionStorage.setItem("result", fullPage);

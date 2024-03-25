@@ -28,10 +28,11 @@ class MarkdownReader {
     let result = [];
     for(let mdFile of mdFileList) {
       let html = marked.parse(mdFile.data);  
-      let newName = mdFile.name.replace(/\.md$/, '.html');
-      result.push({name: newName, html});
+      let newName = mdFile.name.replace(".md", ".html")
+      result.push({name: newName, data: html});
     }
     return result;
   }
 
 }
+
