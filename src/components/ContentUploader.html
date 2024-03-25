@@ -1,6 +1,6 @@
 <div>
   <input
-    hx-on:change="validateSize(this,2000000)"
+    hx-on:change="validateSize(this,2000000) ? null : alert('File size must be less than 2MB')"
     type="file"
     id="fileInput"
     accept=".md, .txt"
@@ -12,17 +12,26 @@
   function uploadFile() {
     const fileInput = document.getElementById("fileInput");
     const files = fileInput.files;
-    const isValid = validateSize(files);
 
-    if (files.length !== 0) {
+    if (files.length !== 0) { 
+      // check overlap
+      if(isFileNameOverlap(files)){ 
+        alert("All files must have distinct name");
+        return;
+      } 
+
       // Read file contents using FileReader
       const reader = new FileReader();
       reader.onload = function (event) {
-        const fileData = event.target.result; 
+        const fileData = event.target.result;  
+
+        // store the file content in global variable
         mdContent = fileData
       };  
-      reader.readAsText(files[0]);
-      uploadedFiles = files; 
+      reader.readAsText(files[0]); 
+
+      // show list of uploaded files
+      uploadedFiles = files;   
       updatePreview();
     }else{ 
       alert("Please upload a file");

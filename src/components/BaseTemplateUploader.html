@@ -1,6 +1,6 @@
 <div>
   <input
-    hx-on:change="validateSize(this, 2000000)"
+    hx-on:change="validateSize(this, 2000000) ? null : alert('File size must be less than 2MB')"
     type="file"
     id="templateInput"
     accept=".rar, .zip, .html"
