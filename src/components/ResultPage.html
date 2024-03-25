@@ -5,7 +5,6 @@
     <script>
         let result = sessionStorage.getItem("result") ; 
       if (result) { 
-        result = JSON.parse(result); 
         document.open();  
         document.write(result)
         document.close();

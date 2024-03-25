@@ -9,11 +9,11 @@
       hx-get="/src/components/ContentUploader.html"
       hx-swap="outerHTML"
     ></div>
-    <div
+    <!-- <div
       hx-trigger="load"
       hx-get="/src/components/BaseTemplateUploader.html"
       hx-swap="outerHTML"
-    ></div>
+    ></div> -->
 
     <button hx-on:click="build()">build</button>
 
@@ -54,29 +54,35 @@
         if (!mdContent) {
           alert("Please upload markdown content");
           return;
-        }
-        if (!uploadedTemplateBase) {
-          alert("Please upload a template");
-          return;
+        }  
+
+        // build default template components
+        const singleItemTemplate = await (await fetch("/src/templates/default/massively/single-item.html")).text();
+        const fullItemTemplate = await (await fetch("/src/templates/default/massively/full-item.html")).text(); 
+        Handlebars.registerPartial("singleItemPartial", singleItemTemplate);
+
+        // pick base template
+        let baseTemplate = await (await fetch("/src/templates/default/massively/index.html")).text();
+        if (uploadedTemplateBase) { 
+          baseTemplate = uploadedTemplateBase.documentElement.innerHTML;
         }
 
-        // add content to the template
-        const body = uploadedTemplateBase.documentElement.body;
-        const res = await fetch("/src/templates/single-item.html");
-        const template = await res.text();
-        const singleItemTemplate = Handlebars.compile(template);
-        for (let file of uploadedFiles) {
-          body.innerHTML += singleItemTemplate({
+        // build full page   
+        const fullPageCompiler = Handlebars.compile(baseTemplate);
+        let articles = []
+        for (let file of uploadedFiles) {  
+          articles.push({
             header: file.name,
-            description: "description here",
-            contentLink: 
+            description: "description",
+            contentLink: "#"
           });
-        }
+        } 
+        const fullPage = fullPageCompiler({articles: articles});
 
         // render the whole template in another page.
         sessionStorage.setItem(
           "result",
-          JSON.stringify(uploadedTemplateBase.documentElement.innerHTML)
+          fullPage
         );
         const url = "src/components/ResultPage.html";
         window.open(url, '_blank').focus();
